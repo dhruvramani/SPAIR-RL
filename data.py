@@ -21,14 +21,14 @@ class CLEVR(Dataset):
         else:
             key_word = 'val'
 
-        json_fn = os.path.join(root, 'scenes', f'CLEVR_{key_word}_scenes.json')
+        json_fn = os.path.join(root, 'scenes', 'CLEVR_{}_scenes.json'.format(key_word))
 
         with open(json_fn) as json_file:
             json_data = json.load(json_file)
 
         self.num_obj = [len(s['objects']) for s in json_data['scenes']]
 
-        self.image_path = os.path.join(root, 'images', f'{key_word}')
+        self.image_path = os.path.join(root, 'images', '{}'.format(key_word))
 
         image_fn = [fn for fn in os.listdir(self.image_path) if
                     fn.startswith('CLEVR_') and fn.endswith('.png')]
