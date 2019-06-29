@@ -41,7 +41,7 @@ def create(n_images=5000):
     to_read = []
     for env in _list:
         for i in range(0, n_images):
-            to_read.append("/Users/sunweihao/works/research/tensorpack/examples/A3C-Gym/atari_min/%s/%05d.jpg" % (env, i, ))
+            to_read.append("./atari_min/%s/%05d.jpg" % (env, i, ))
 
     import random
     random.shuffle(to_read)
