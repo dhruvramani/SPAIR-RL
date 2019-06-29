@@ -142,7 +142,7 @@ def calc_count_acc(z_pres, target):
     # (bs)
     out = (z_pres > .5).float().flatten(start_dim=1).sum(dim=1)
 
-    acc = (out == target).float().mean()
+    acc = (out == target.float()).float().mean()
 
     return acc.item()
 
@@ -151,6 +151,6 @@ def calc_count_more_num(z_pres, target):
     # (bs)
     out = (z_pres > .5).float().flatten(start_dim=1).sum(dim=1)
 
-    more_num = (out > target).float().sum()
+    more_num = (out > target.float()).float().sum()
 
     return more_num.item()
