@@ -13,6 +13,7 @@ import torchvision.transforms as transforms
 from torchvision.utils import make_grid
 from torch import nn
 from torchvision import datasets
+from create_atari.data_atari import ATARI
 from torch.optim.lr_scheduler import LambdaLR
 from data import MultiDSprites, CLEVR
 from utils import save_ckpt, load_ckpt, linear_annealing, visualize, \
@@ -87,8 +88,8 @@ def main():
         "cuda" if not args.nocuda and torch.cuda.is_available() else "cpu")
     # torch.manual_seed(args.seed)
 
-    train_data = CLEVR(root=args.data_dir, phase_train=True)
-
+    train_data = ATARI(root=args.data_dir, phase_train=True) # CLEVR
+ 
     train_loader = DataLoader(
         train_data, batch_size=args.batch_size, shuffle=True)
 
