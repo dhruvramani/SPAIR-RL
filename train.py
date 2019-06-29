@@ -30,7 +30,7 @@ from spair import Spair
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='SPAIR')
-    parser.add_argument('--data-dir', default='./data', metavar='DIR',
+    parser.add_argument('--data-dir', default='./create_atari', metavar='DIR',
                         help='train.pt file')
     parser.add_argument('--nocuda', action='store_true', default=False,
                         help='disables CUDA training')

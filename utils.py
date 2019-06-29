@@ -48,7 +48,7 @@ def print_spair_clevr(global_step, epoch, local_count, count_inter,
           '({:3.1f}%)]    '.format(100. * local_count / num_train),
           'total_loss: {:.4f} log_like: {:.4f} '.format(total_loss.item(), log_like.item()),
           'What KL: {:.4f} Where KL: {:.4f} '.format(z_what_kl_loss.item(), z_where_kl_loss.item()),
-          'Pres KL: {:.4f} Depth KL: {:.4f} '.fromat(z_pres_kl_loss.item(), z_depth_kl_loss.item()),
+          'Pres KL: {:.4f} Depth KL: {:.4f} '.format(z_pres_kl_loss.item(), z_depth_kl_loss.item()),
           'Bg KL: {:.4f} [{:.1f}s / {:>4} data]'.format(kl_bg_what_loss.item(), time_inter, count_inter))
 
 
