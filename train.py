@@ -15,7 +15,7 @@ from torch import nn
 from torchvision import datasets
 from create_atari.data_atari import ATARI
 from torch.optim.lr_scheduler import LambdaLR
-from data import MultiDSprites, CLEVR
+#from data import MultiDSprites, CLEVR
 from utils import save_ckpt, load_ckpt, linear_annealing, visualize, \
     calc_count_acc, calc_count_more_num, print_spair_clevr, spatial_transform
 from common import *
