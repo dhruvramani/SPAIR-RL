@@ -28,15 +28,15 @@ def create(n_images=5000):
 
     _list = [
         "Frostbite-v0",
-        "Assault-v0",
-        "Asterix-v0",
-        "Carnival-v0",
-        "ElevatorAction-v0",
-        "Gopher-v0",
-        "Kangaroo-v0",
-        "SpaceInvaders-v0",
-        "Qbert-v0",
-        "MsPacman-v0",
+        #"Assault-v0",
+        #"Asterix-v0",
+        #"Carnival-v0",
+        #"ElevatorAction-v0",
+        #"Gopher-v0",
+        #"Kangaroo-v0",
+        #"SpaceInvaders-v0",
+        #"Qbert-v0",
+        #"MsPacman-v0",
     ]
     to_read = []
     for env in _list:
