@@ -20,7 +20,7 @@ gbox[1, :, -2:] = 1
 gbox = gbox.view(1, 3, 21, 21)
 
 
-def visualize(x, z_pres, z_where_scale, z_where_shift, rbox=rbox, gbox=gbox):
+def visualize(x, z_pres, z_where_scale, z_where_shift, rbox=rbox, gbox=gbox, num_obj=4*4):
     """
         x: (bs, 3, img_h, img_w)
         z_pres: (bs, 4, 4, 1)
@@ -28,7 +28,7 @@ def visualize(x, z_pres, z_where_scale, z_where_shift, rbox=rbox, gbox=gbox):
         z_where_shift: (bs, 4, 4, 2)
     """
     bs = z_pres.size(0)
-    num_obj = 4 * 4
+    #num_obj = 4 * 4
     z_pres = z_pres.view(-1, 1, 1, 1)
     # z_scale = z_where[:, :, :2].view(-1, 2)
     # z_shift = z_where[:, :, 2:].view(-1, 2)
@@ -41,15 +41,43 @@ def visualize(x, z_pres, z_where_scale, z_where_shift, rbox=rbox, gbox=gbox):
     bbox = (bbox + torch.stack(num_obj * (x,), dim=1).view(-1, 3, img_h, img_w)).clamp(0.0, 1.0)
     return bbox
 
+def bbox_in_one(x, z_pres, z_where_scale, z_where_shift, rbox=rbox, gbox=gbox, num_obj=4*4):
+
+    bs = z_pres.size(0)
+    z_pres = z_pres.view(-1, 1, 1, 1)
+    z_scale = z_where_scale.view(-1, 2)
+    z_shift = z_where_shift.view(-1, 2)
+    bbox = spatial_transform(z_pres * gbox,# + (1 - z_pres) * rbox,
+                             torch.cat((z_scale, z_shift), dim=1),
+                             torch.Size([bs * num_obj, 3, img_h, img_w]),
+                             inverse=True)
+    #print('bbox', bbox.sum(dim=1).shape)
+    #print('x', x.shape)
+    bbox = ((bbox.view(bs, num_obj, 3, img_h, img_w).sum(dim=1)).clamp(0.0, 1.0) + x).clamp(0.0, 1.0)
+    return bbox
+
 def print_spair_clevr(global_step, epoch, local_count, count_inter,
                       num_train, total_loss, log_like, z_what_kl_loss, z_where_kl_loss,
                       z_pres_kl_loss, z_depth_kl_loss, kl_bg_what_loss, time_inter):
-    print('Step: {:>5} Train Epoch: {:>3} [{:>4}/{:>4} '.format(global_step, epoch, local_count, num_train),
-          '({:3.1f}%)]    '.format(100. * local_count / num_train),
-          'total_loss: {:.4f} log_like: {:.4f} '.format(total_loss.item(), log_like.item()),
-          'What KL: {:.4f} Where KL: {:.4f} '.format(z_what_kl_loss.item(), z_where_kl_loss.item()),
-          'Pres KL: {:.4f} Depth KL: {:.4f} '.format(z_pres_kl_loss.item(), z_depth_kl_loss.item()),
-          'Bg KL: {:.4f} [{:.1f}s / {:>4} data]'.format(kl_bg_what_loss.item(), time_inter, count_inter))
+    print(f'Step: {global_step:>5} Train Epoch: {epoch:>3} [{local_count:>4}/{num_train:>4} ' + \
+          f'({100. * local_count / num_train:3.1f}%)]    ' + \
+          f'total_loss: {total_loss.item():.4f} log_like: {log_like.item():.4f} ' + \
+          f'What KL: {z_what_kl_loss.item():.4f} Where KL: {z_where_kl_loss.item():.4f} ' + \
+          f'Pres KL: {z_pres_kl_loss.item():.4f} Depth KL: {z_depth_kl_loss.item():.4f} ' + \
+          f'Bg KL: {kl_bg_what_loss.item():.4f} [{time_inter:.1f}s / {count_inter:>4} data]')
+    return
+
+def print_spair_clevr2(global_step, epoch, local_count, count_inter,
+                      num_train, total_loss, log_like, z_what_kl_loss, z_where_kl_loss,
+                      z_pres_kl_loss, z_depth_kl_loss, kl_bg_what_loss, log_like_bg, log_like_alpha_map, time_inter):
+    print(f'Step: {global_step:>5} Train Epoch: {epoch:>3} [{local_count:>4}/{num_train:>4} ' + \
+          f'({100. * local_count / num_train:3.1f}%)]    ' + \
+          f'total_loss: {total_loss.item():.4f} log_like: {log_like.item():.4f} ' + \
+          f'log_like_bg: {log_like_bg.item():.4f} log_like_alpha_map: {log_like_alpha_map.item():.4f} ' + \
+          f'What KL: {z_what_kl_loss.item():.4f} Where KL: {z_where_kl_loss.item():.4f} ' + \
+          f'Pres KL: {z_pres_kl_loss.item():.4f} Depth KL: {z_depth_kl_loss.item():.4f} ' + \
+          f'Bg KL: {kl_bg_what_loss.item():.4f} [{time_inter:.1f}s / {count_inter:>4} data]')
+    return
 
 
 def save_ckpt(ckpt_dir, model, optimizer, global_step, epoch, local_count,
@@ -68,6 +96,7 @@ def save_ckpt(ckpt_dir, model, optimizer, global_step, epoch, local_count,
     path = os.path.join(ckpt_dir, ckpt_model_filename)
     torch.save(state, path)
     print('{:>2} has been successfully saved'.format(path))
+    return
 
 
 def load_ckpt(model, optimizer, model_file, device):
@@ -140,9 +169,10 @@ def calc_kl_z_pres_bernoulli(z_pres_logits, prior_pres_prob, eps=1e-15):
 
 def calc_count_acc(z_pres, target):
     # (bs)
+    #print(target.float())
     out = (z_pres > .5).float().flatten(start_dim=1).sum(dim=1)
-
-    acc = (out == target.float()).float().mean()
+    #print(out)
+    acc = (out.float() == target.float()).float().mean()
 
     return acc.item()
 
@@ -151,6 +181,6 @@ def calc_count_more_num(z_pres, target):
     # (bs)
     out = (z_pres > .5).float().flatten(start_dim=1).sum(dim=1)
 
-    more_num = (out > target.float()).float().sum()
+    more_num = (out.float() > target.float()).float().sum()
 
     return more_num.item()
